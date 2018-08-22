@@ -70,7 +70,7 @@ Configure SSO
 
 ## Run the containers
 
-Four containers as in the quickstart docker-compose.yml included in this repo. They are `sso_auth` and `sso_proxy`
+Four containers are in the quickstart docker-compose.yml included in this repo. They are `sso_auth` and `sso_proxy`
 containers, which run the `sso` code. A `nginx-proxy` container which acts as a dynamic proxy front-ending the cluster,
 and lastly a `payload` container which runs the payload that's `sso` is providing auth services for.
 
