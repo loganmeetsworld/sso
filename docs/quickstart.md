@@ -57,6 +57,77 @@ fields, a "client ID" and a "client secret". Copy both of these values to a safe
 location before clicking the "OK" button to proceed. The "client ID" and "client secret" strings
 will be used to configure your `sso` deployment, as described below.
 
+## Restricting authorization to particular Google groups on a domain
+
+If desired, `sso` can be configured to only grant access to users that are members of particular
+Google groups.
+
+#### Create a service account
+
+Begin by creating a "service account". This will be the identity assumed by `sso` when requesting
+information about a user from Google. Go to the [Service Accounts] page in IAM/Admin, and verify
+that the correct project name appears in the dashboard at the top of the page before proceeding.
+Click "Create Service Account" toward the top of the page to begin creating the account.
+
+![Creating a service account](images/setup-create_service_account.jpg)
+
+Fill out the fields requested as follows:
+- **Service account name**: Any appropriate name is fine. We recommend `sso-authenticator`.
+- **Service account ID**: Google will generate this as you type the "account name". We recommend
+leaving as-is.
+- **Project rol**: No project roles are required for `sso`.
+- **Furnish a new private key**: Check this box, and select `JSON` as the "Key type".
+- **Enable G Suite Domain-wide Delegation**: Check this box.
+
+Click the "Save" button after entering this information. Google will download a `.json` file
+through your browser containing a private key. Make sure not to lose this.
+
+In the [Credentials](https://console.cloud.google.com/apis/credentials) page, you should now see
+the service account that you just created listed under "OAuth 2.0 client IDs". Copy the "Client ID",
+as it will be used in the next step.
+
+#### Authorizing use of the Admin SDK API
+
+Click [here](https://console.cloud.google.com/apis/library/admin.googleapis.com) to go to Google's
+page for the "Admin SDK" API. Click "Enable" to enable the API for your project. Note that if the
+API has already been enabled on your project, then you will see the word "API enabled" along with
+a green checkmark.
+
+![Admin API](images/setup-admin_api.jpg)
+
+Go to the [Google Admin console](https://admin.google.com); note that you may be prompted to log
+in again. Select "Security" from the available controls (click "More Controls" if it is not visible
+when the page first loads).
+
+![Security Admin Control](images/setup-security_control.jpg)
+
+Click the "Advanced settings" option, and select "Manage API client access" from the resulting
+panel.
+
+![API Client Access](images/setup-api_client_access.jpg)
+
+In the "Client Name" field, enter the Client ID of the service account that you have created. You
+will need to provide the following "API Scopes" for the service account that we have created:
+- `https://www.googleapis.com/auth/admin.directory.group.readonly`
+- `https://www.googleapis.com/auth/admin.directory.user.readonly`
+
+Type these into the field titled "One or More API Scopes", as a comma-separated list. After these
+have been filled in, click the "Authorize" button.
+
+#### Configuring `sso` to act as an administrator
+
+When running the `sso-authenticator` binary, the following environment variables must be set, in
+order to act as an administrator and access user group membership data:
+- **`BUZZFEED_GOOGLE_ADMIN_EMAIL` **: An administrative email address on your organization's
+domain, the identity of which can be assumed by `sso`.
+- **`BUZZFEED_GOOGLE_SERVICE_ACCOUNT_JSON`**: A permanent location for the private key `.json` file 
+that was downloaded through your browser at the time of service account creation. There is no
+reason why this file should ever be accessed by any person or service other than `sso`; ensure that
+file permissions are set accordingly.
+
+If you already have an instance of `sso` running, then it will need to be restarted before these
+changes will take effect.
+
 ## Docker and Docker Compose Provisioning
 
 Next, third party dependencies must be created and AWS resources provisioned:
