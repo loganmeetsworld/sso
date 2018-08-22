@@ -1,11 +1,11 @@
 # Initial Setup / Operations
 
-`sso` automates almost all of the provisioning necessary to deploy services, however, there are
-a few one-time prerequisites that need to be handled manually.
+`SSO` is used to provide single-sign-on authentication and authorization for internal web
+applications, however, there are a few one-time prerequisites that need to be handled manually.
 
 **NOTE: all commands should be performed on your HOST OS.**
 
-## Google Oauth Setup
+## Google OAuth Setup
 
 Configuring `sso` requires that we first configure a Google OAuth Project.
 
@@ -26,7 +26,7 @@ few moments.
 #### Configure Google OAuth
 
 Once your project has been created, click [here](
-https://console.cloud.google.com/apis/credentials/consent) to configure the "Oauth consent screen"
+https://console.cloud.google.com/apis/credentials/consent) to configure the "OAuth consent screen"
 for your project. Make sure that the name of the project you have created appears next to the words
 "Google Cloud Platform" in the toolbar at the top of the website; if it does not, switch to your
 project by clicking the name that appears there, and selecting the project you just created.
@@ -130,23 +130,27 @@ changes will take effect.
 
 ## Docker and Docker Compose Provisioning
 
-Next, third party dependencies must be created and AWS resources provisioned:
+Next, third party dependencies must be installed and configuration files modified:
 
- 1. Setup Docker and Docker Compose on your machine
-     Compose: https://docs.docker.com/compose/install/
-     
+Setup Docker and Docker Compose on your machine by following the directions at https://docs.docker.com/compose/install/
+
+Configure SSO
  
- 2. Configure SSO
- 
- docker run buzzfeed/cop:fix-dockerfile ping -c 1 host.docker.internal | grep icmp_seq | awk '{print $4}' | cut -d':' -f1
+<flesh this out>
 
 
+## Run the containers
 
+Four containers are in the quickstart docker-compose.yml included in this repo. They are `sso_auth` and `sso_proxy`
+containers, which run the `sso` code. A `nginx-proxy` container which acts as a dynamic proxy front-ending the cluster,
+and lastly a `payload` container which runs the payload that's `sso` is providing auth services for.
 
-## Run the container
+Copy the `docker-compose.yml.example`, `env.example` and `proxy_configs.yml.example` files to new instances removing the
+.example trailer on the file name.
 
+Config those files per the instructions in http://./quickstart.md#docker-and-docker-compose-provisioning
 
-Execute the containers by running the `run_sso_proxy.sh` script, and run a `docker ps` to see all four containers are up.
+Execute the containers by running the `quickstart.sh` script, and run a `docker ps` to see all four containers are up.
 
 ![StartScript](images/start-script.jpg)
 
@@ -168,17 +172,5 @@ The google-auth will redirect you back to the desired payload page http://payloa
 
 ![PayloadScreen](images/payload-screen.jpg)
  
-The `sso` CLI can then be used to perform _all_ operations, including deployment, service removal,
-etc.
-
-access via http://payload.sso.local/
-
-
-[papertrail]: https://papertrailapp.com/
-[datadog]: https://datadog.com
-[Terraform]: https://www.terraform.io/
-[Packer]: https://www.packer.io/
-[sso_config]: /docs/sso_config.md
-[how-do-i-even-gpg]: /docs/secrets.md#how-do-i-even-gpg
-[secrets]: /docs/secrets.md#overview
-
+The `sso` payloads can be changed by following the https://./sso_config.md doc to change
+sso-proxy configs and then restarting the sso-proxy container.
